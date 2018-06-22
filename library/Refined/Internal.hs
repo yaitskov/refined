@@ -109,8 +109,6 @@ module Refined.Internal
   , SizeGreaterThan
   , SizeEqualTo
   , NonEmpty
-
-    -- * IsList predicates
   , Ascending
   , Descending
 
@@ -241,7 +239,7 @@ decreasing = dec . foldl' go Empty where
 -- | A refinement type, which wraps a value of type @x@,
 --   ensuring that it satisfies a type-level predicate @p@.
 newtype Refined p x = Refined x
-  deriving (Eq, Foldable , Ord, Show, Typeable) 
+  deriving (Eq, Foldable, Ord, Show, Typeable) 
 
 type role Refined nominal nominal
 
@@ -263,8 +261,8 @@ instance (TH.Lift x) => TH.Lift (Refined p x) where
 --   Checks the input value at runtime.
 refine :: (Predicate p x) => x -> Either RefineException (Refined p x)
 refine x = do
-  let predicateByResult :: RefineM (Refined p x) -> p
-      predicateByResult = const undefined
+  let predicateByResult :: forall p x. RefineM (Refined p x) -> Proxy p
+      predicateByResult = const (Proxy :: Proxy p)
   runRefineM $ fix $ \result -> do
     validate (predicateByResult result) x
     pure (Refined x)
@@ -341,7 +339,7 @@ class (Typeable p) => Predicate p x where
   {-# MINIMAL validate #-} 
   -- | Check the value @x@ according to the predicate @p@,
   --   producing an error string if the value does not satisfy.
-  validate :: (Monad m) => p -> x -> RefineT m ()
+  validate :: (Monad m) => Proxy p -> x -> RefineT m ()
 
 --------------------------------------------------------------------------------
 
@@ -359,7 +357,7 @@ data Not p
 
 instance (Predicate p x, Typeable p) => Predicate (Not p) x where
   validate p x = do
-    result <- runRefineT (validate @p undefined x)
+    result <- runRefineT (validate @p Proxy x)
     when (isRight result) $ do
       throwRefine (RefineNotException (typeOf p))
 
@@ -376,8 +374,8 @@ type (&&) = And
 instance ( Predicate l x, Predicate r x, Typeable l, Typeable r
          ) => Predicate (And l r) x where
   validate p x = do
-    a <- lift $ runRefineT $ validate @l undefined x
-    b <- lift $ runRefineT $ validate @r undefined x
+    a <- lift $ runRefineT $ validate @l Proxy x
+    b <- lift $ runRefineT $ validate @r Proxy x
     let throw err = throwRefine (RefineAndException (typeOf p) err)
     case (a, b) of
       (Left  e, Left e1) -> throw (These e e1)
@@ -398,8 +396,8 @@ type (||) = Or
 instance ( Predicate l x, Predicate r x, Typeable l, Typeable r
          ) => Predicate (Or l r) x where
   validate p x = do
-    left  <- lift $ runRefineT $ validate @l undefined x
-    right <- lift $ runRefineT $ validate @r undefined x
+    left  <- lift $ runRefineT $ validate @l Proxy x
+    right <- lift $ runRefineT $ validate @r Proxy x
     case (left, right) of
       (Left l, Left r) -> throwRefine (RefineOrException (typeOf p) l r)
       _                -> pure ()
@@ -413,7 +411,7 @@ data SizeLessThan (n :: Nat)
 
 instance (Foldable t, KnownNat n) => Predicate (SizeLessThan n) (t a) where
   validate p x = do
-    let x' = natVal p
+    let x' = natVal @n Proxy
         sz = length x
     unless (sz < fromIntegral x') $ do
       throwRefineOtherException (typeOf p)
@@ -429,7 +427,7 @@ data SizeGreaterThan (n :: Nat)
 
 instance (Foldable t, KnownNat n) => Predicate (SizeGreaterThan n) (t a) where
   validate p x = do
-    let x' = natVal p
+    let x' = natVal @n Proxy
         sz = length x
     unless (sz > fromIntegral x') $ do
       throwRefineOtherException (typeOf p)
@@ -445,7 +443,7 @@ data SizeEqualTo (n :: Nat)
 
 instance (Foldable t, KnownNat n) => Predicate (SizeEqualTo n) (t a) where
   validate p x = do
-    let x' = natVal p
+    let x' = natVal @n Proxy
         sz = length x
     unless (sz == fromIntegral x') $ do
       throwRefineOtherException (typeOf p)
@@ -487,7 +485,7 @@ data LessThan (n :: Nat)
 
 instance (Ord x, Num x, KnownNat n) => Predicate (LessThan n) x where
   validate p x = do
-    let x' = natVal p
+    let x' = natVal @n Proxy
     unless (x < fromIntegral x') $ do
       throwRefineOtherException (typeOf p)
         $ "Value is not less than " <> PP.pretty x'
@@ -501,7 +499,7 @@ data GreaterThan (n :: Nat)
 
 instance (Ord x, Num x, KnownNat n) => Predicate (GreaterThan n) x where
   validate p x = do
-    let x' = natVal p
+    let x' = natVal @n Proxy
     unless (x > fromIntegral x') $ do
       throwRefineOtherException (typeOf p)
         $ "Value is not greater than " <> PP.pretty x'
@@ -515,7 +513,7 @@ data From (n :: Nat)
 
 instance (Ord x, Num x, KnownNat n) => Predicate (From n) x where
   validate p x = do
-    let x' = natVal p
+    let x' = natVal @n Proxy
     unless (x >= fromIntegral x') $ do
       throwRefineOtherException (typeOf p)
         $ "Value is less than " <> PP.pretty x'
@@ -529,7 +527,7 @@ data To (n :: Nat)
 
 instance (Ord x, Num x, KnownNat n) => Predicate (To n) x where
   validate p x = do
-    let x' = natVal p
+    let x' = natVal @n Proxy
     unless (x <= fromIntegral x') $ do
       throwRefineOtherException (typeOf p)
         $ "Value is greater than " <> PP.pretty x'
@@ -563,7 +561,7 @@ data EqualTo (n :: Nat)
 
 instance (Eq x, Num x, KnownNat n) => Predicate (EqualTo n) x where
   validate p x = do
-    let x' = natVal p
+    let x' = natVal @n Proxy
     unless (x == fromIntegral x') $ do
       throwRefineOtherException (typeOf p)
         $ "Value does not equal " <> PP.pretty x'
@@ -577,7 +575,7 @@ data NotEqualTo (n :: Nat)
 
 instance (Eq x, Num x, KnownNat n) => Predicate (NotEqualTo n) x where
   validate p x = do
-    let x' = natVal p
+    let x' = natVal @n Proxy
     unless (x /= fromIntegral x') $ do
       throwRefineOtherException (typeOf p)
         $ "Value does equal " <> PP.pretty x'
