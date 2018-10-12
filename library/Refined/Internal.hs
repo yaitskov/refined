@@ -159,7 +159,6 @@ import           Data.Foldable                (Foldable(length, foldl'))
 import           Data.Function                (const, flip, ($), (.))
 import           Data.Functor                 (Functor, fmap)
 import           Data.Functor.Identity        (Identity (runIdentity))
-import qualified Data.List                    as List
 import           Data.List                    ((++))
 import           Data.Monoid                  (mconcat)
 import           Data.Ord                     (Ord, (<), (<=), (>), (>=))
@@ -167,7 +166,6 @@ import           Data.Proxy                   (Proxy (Proxy))
 import           Data.Semigroup               (Semigroup((<>)))
 import           Data.Typeable                (TypeRep, Typeable, typeOf)
 import           Data.Void                    (Void)
-import           GHC.Stack                    (CallStack, HasCallStack, prettyCallStack, callStack)
 import           Text.Read                    (Read (readsPrec), lex, readParen)
 import           Text.Show                    (Show (show))
 
@@ -339,7 +337,7 @@ unrefine = coerce
 
 -- | A typeclass which defines a runtime interpretation of
 --   a type-level predicate @p@ for type @x@.
-class (Typeable p, Show x) => Predicate p x where
+class (Typeable p) => Predicate p x where
   {-# MINIMAL validate #-} 
   -- | Check the value @x@ according to the predicate @p@,
   --   producing an error string if the value does not satisfy.
@@ -347,10 +345,11 @@ class (Typeable p, Show x) => Predicate p x where
 
 --------------------------------------------------------------------------------
 
+-- | A predicate which is satisfied for all types.
 data IdPred
   deriving (Generic)
 
-instance (Show x) => Predicate IdPred x where
+instance Predicate IdPred x where
   validate _ _ = pure ()
 
 --------------------------------------------------------------------------------
@@ -359,11 +358,11 @@ instance (Show x) => Predicate IdPred x where
 data Not p
   deriving (Generic, Generic1)
 
-instance (Predicate p x, Typeable p, Show x) => Predicate (Not p) x where
+instance (Predicate p x, Typeable p) => Predicate (Not p) x where
   validate p x = do
     result <- runRefineT (validate @p undefined x)
     when (isRight result) $ do
-      throwRefine (RefineNotException (typeOf p) callStack (PP.pretty $ show x))
+      throwRefine (RefineNotException (typeOf p))
 
 --------------------------------------------------------------------------------
 
@@ -375,7 +374,7 @@ infixr 3 &&
 -- | The conjunction of two predicates.
 type (&&) = And
 
-instance ( Predicate l x, Predicate r x, Typeable l, Typeable r, Show x
+instance ( Predicate l x, Predicate r x, Typeable l, Typeable r
          ) => Predicate (And l r) x where
   validate p x = do
     a <- lift $ runRefineT $ validate @l undefined x
@@ -397,7 +396,7 @@ infixr 2 ||
 -- | The disjunction of two predicates.
 type (||) = Or
 
-instance ( Predicate l x, Predicate r x, Typeable l, Typeable r, Show x
+instance ( Predicate l x, Predicate r x, Typeable l, Typeable r
          ) => Predicate (Or l r) x where
   validate p x = do
     left  <- lift $ runRefineT $ validate @l undefined x
@@ -413,7 +412,7 @@ instance ( Predicate l x, Predicate r x, Typeable l, Typeable r, Show x
 data SizeLessThan (n :: Nat)
   deriving (Generic)
 
-instance (Foldable t, KnownNat n, Show (t a)) => Predicate (SizeLessThan n) (t a) where
+instance (Foldable t, KnownNat n) => Predicate (SizeLessThan n) (t a) where
   validate p x = do
     let x' = natVal p
         sz = length x
@@ -429,7 +428,7 @@ instance (Foldable t, KnownNat n, Show (t a)) => Predicate (SizeLessThan n) (t a
 data SizeGreaterThan (n :: Nat)
   deriving (Generic)
 
-instance (Foldable t, KnownNat n, Show (t a)) => Predicate (SizeGreaterThan n) (t a) where
+instance (Foldable t, KnownNat n) => Predicate (SizeGreaterThan n) (t a) where
   validate p x = do
     let x' = natVal p
         sz = length x
@@ -445,7 +444,7 @@ instance (Foldable t, KnownNat n, Show (t a)) => Predicate (SizeGreaterThan n) (
 data SizeEqualTo (n :: Nat)
   deriving (Generic)
 
-instance (Foldable t, KnownNat n, Show (t a)) => Predicate (SizeEqualTo n) (t a) where
+instance (Foldable t, KnownNat n) => Predicate (SizeEqualTo n) (t a) where
   validate p x = do
     let x' = natVal p
         sz = length x
@@ -461,7 +460,7 @@ instance (Foldable t, KnownNat n, Show (t a)) => Predicate (SizeEqualTo n) (t a)
 data Ascending
   deriving (Generic)
 
-instance (Foldable t, Ord a, Show (t a)) => Predicate Ascending (t a) where
+instance (Foldable t, Ord a) => Predicate Ascending (t a) where
   validate p x = do
     unless (increasing x) $ do
       throwRefineOtherException (typeOf p)
@@ -474,7 +473,7 @@ instance (Foldable t, Ord a, Show (t a)) => Predicate Ascending (t a) where
 data Descending
   deriving (Generic)
 
-instance (Foldable t, Ord a, Show (t a)) => Predicate Descending (t a) where
+instance (Foldable t, Ord a) => Predicate Descending (t a) where
   validate p x = do
     unless (decreasing x) $ do
       throwRefineOtherException (typeOf p)
@@ -487,7 +486,7 @@ instance (Foldable t, Ord a, Show (t a)) => Predicate Descending (t a) where
 data LessThan (n :: Nat)
   deriving (Generic)
 
-instance (Ord x, Num x, Show x, KnownNat n) => Predicate (LessThan n) x where
+instance (Ord x, Num x, KnownNat n) => Predicate (LessThan n) x where
   validate p x = do
     let x' = natVal p
     unless (x < fromIntegral x') $ do
@@ -501,7 +500,7 @@ instance (Ord x, Num x, Show x, KnownNat n) => Predicate (LessThan n) x where
 data GreaterThan (n :: Nat)
   deriving (Generic)
 
-instance (Ord x, Num x, Show x, KnownNat n) => Predicate (GreaterThan n) x where
+instance (Ord x, Num x, KnownNat n) => Predicate (GreaterThan n) x where
   validate p x = do
     let x' = natVal p
     unless (x > fromIntegral x') $ do
@@ -515,7 +514,7 @@ instance (Ord x, Num x, Show x, KnownNat n) => Predicate (GreaterThan n) x where
 data From (n :: Nat)
   deriving (Generic)
 
-instance (Ord x, Num x, Show x, KnownNat n) => Predicate (From n) x where
+instance (Ord x, Num x, KnownNat n) => Predicate (From n) x where
   validate p x = do
     let x' = natVal p
     unless (x >= fromIntegral x') $ do
@@ -529,7 +528,7 @@ instance (Ord x, Num x, Show x, KnownNat n) => Predicate (From n) x where
 data To (n :: Nat)
   deriving (Generic)
 
-instance (Ord x, Num x, Show x, KnownNat n) => Predicate (To n) x where
+instance (Ord x, Num x, KnownNat n) => Predicate (To n) x where
   validate p x = do
     let x' = natVal p
     unless (x <= fromIntegral x') $ do
@@ -542,7 +541,7 @@ instance (Ord x, Num x, Show x, KnownNat n) => Predicate (To n) x where
 data FromTo (mn :: Nat) (mx :: Nat)
   deriving (Generic)
 
-instance ( Ord x, Num x, Show x, KnownNat mn, KnownNat mx, mn <= mx
+instance ( Ord x, Num x, KnownNat mn, KnownNat mx, mn <= mx
          ) => Predicate (FromTo mn mx) x where
   validate p x = do
     let mn' = natVal (Proxy @mn)
@@ -563,7 +562,7 @@ instance ( Ord x, Num x, Show x, KnownNat mn, KnownNat mx, mn <= mx
 data EqualTo (n :: Nat)
   deriving (Generic)
 
-instance (Eq x, Num x, Show x, KnownNat n) => Predicate (EqualTo n) x where
+instance (Eq x, Num x, KnownNat n) => Predicate (EqualTo n) x where
   validate p x = do
     let x' = natVal p
     unless (x == fromIntegral x') $ do
@@ -577,7 +576,7 @@ instance (Eq x, Num x, Show x, KnownNat n) => Predicate (EqualTo n) x where
 data NotEqualTo (n :: Nat)
   deriving (Generic)
 
-instance (Eq x, Num x, Show x, KnownNat n) => Predicate (NotEqualTo n) x where
+instance (Eq x, Num x, KnownNat n) => Predicate (NotEqualTo n) x where
   validate p x = do
     let x' = natVal p
     unless (x /= fromIntegral x') $ do
@@ -681,21 +680,20 @@ data RefineException
     RefineNotException
     { _RefineException_typeRep   :: !TypeRep
       -- ^ The 'TypeRep' of the @'Not' p@ type.
-    , _RefineException_callStack :: !CallStack
-      -- ^ The location of where the predicate failed 
-    , _RefineException_value     :: !(PP.Doc Void)
     }
 
   | -- | A 'RefineException' for failures involving the 'And' predicate.
     RefineAndException
     { _RefineException_typeRep   :: !TypeRep
       -- ^ The 'TypeRep' of the @'And' l r@ type.
-    , _RefineException_children  :: !(These RefineException RefineException)
+    , _RefineException_andChild  :: !(These RefineException RefineException)
       -- ^ A 'These' encoding which branch(es) of the 'And' failed:
       --   if the 'RefineException' came from the @l@ predicate, then
       --   this will be 'This', if it came from the @r@ predicate, this
       --   will be 'That', and if it came from both @l@ and @r@, this
       --   will be 'These'.
+      
+      -- note to self: what am I, Dr. Seuss?
     }
 
   | -- | A 'RefineException' for failures involving the 'Or' predicate.
@@ -712,10 +710,8 @@ data RefineException
     RefineOtherException
     { _RefineException_typeRep   :: !TypeRep
       -- ^ The 'TypeRep' of the predicate that failed.
-    , _RefineException_message   :: !(PP.Doc Void)
-      -- ^ A custom message to display in the event of an error.
-    , _RefineException_callStack :: !CallStack
-      -- ^ The location of the error.
+    , _RefineException_message  :: !(PP.Doc Void)
+      -- ^ A custom message to display.
     }
   deriving (Generic)
 
@@ -724,33 +720,22 @@ instance Show RefineException where
 
 -- | Display a 'RefineException' as a @'PP.Doc' ann@
 displayRefineException :: RefineException -> PP.Doc ann
-displayRefineException (RefineNotException tr cs v) = PP.pretty $ List.unlines
-  [ "RefineException: "
-  , prettyCallStack cs
-  , "value: " ++ show v
-  , "predicate: " ++ show tr
-  , "issue: " ++ "The negation of the predicate does not hold."
-  ]
-
-displayRefineException _ = ""
-
-
---(RefineOtherException tr msg)
---  = PP.pretty ("The predicate (" ++ show tr ++ ") does not hold: \n \t" ++ show msg)
---displayRefineException (RefineNotException tr cs)
---  = PP.pretty ("The negation of the predicate (" ++ show tr ++ ") does not hold.")
---displayRefineException (RefineOrException tr orLChild orRChild)
---  = PP.pretty ("Both subpredicates failed in: (" ++ show tr ++ "). \n")
---      <> "\t" <> (displayRefineException orLChild) <> "\n"
---      <> "\t" <> (displayRefineException orRChild) <> "\n"
---displayRefineException (RefineAndException tr andChild)
---  = PP.pretty ("The predicate (" ++ show tr ++ ") does not hold: \n \t")
---      <> case andChild of
---           This a -> "The left subpredicate does not hold:\n\t" <> displayRefineException a <> "\n"
---           That b -> "The right subpredicate does not hold:\n\t" <> displayRefineException b <> "\n"
---           These a b -> "\t Neither subpredicate holds: \n"
---             <> "\t" <> displayRefineException a <> "\n"
---             <> "\t" <> displayRefineException b <> "\n"
+displayRefineException (RefineOtherException tr msg)
+  = PP.pretty ("The predicate (" ++ show tr ++ ") does not hold: \n \t" ++ show msg)
+displayRefineException (RefineNotException tr)
+  = PP.pretty ("The negation of the predicate (" ++ show tr ++ ") does not hold.")
+displayRefineException (RefineOrException tr orLChild orRChild)
+  = PP.pretty ("Both subpredicates failed in: (" ++ show tr ++ "). \n")
+      <> "\t" <> (displayRefineException orLChild) <> "\n"
+      <> "\t" <> (displayRefineException orRChild) <> "\n"
+displayRefineException (RefineAndException tr andChild)
+  = PP.pretty ("The predicate (" ++ show tr ++ ") does not hold: \n \t")
+      <> case andChild of
+           This a -> "The left subpredicate does not hold:\n\t" <> displayRefineException a <> "\n"
+           That b -> "The right subpredicate does not hold:\n\t" <> displayRefineException b <> "\n"
+           These a b -> "\t Neither subpredicate holds: \n"
+             <> "\t" <> displayRefineException a <> "\n"
+             <> "\t" <> displayRefineException b <> "\n"
 
 -- | Pretty-print a 'RefineException'.
 instance PP.Pretty RefineException where
@@ -844,7 +829,7 @@ throwRefineOtherException
   -> PP.Doc Void
   -- ^ A 'PP.Doc' 'Void' encoding a custom error message to be pretty-printed. 
   -> RefineT m a
-throwRefineOtherException rep pp
-  = throwRefine (RefineOtherException rep pp callStack)
+throwRefineOtherException rep
+  = RefineOtherException rep .> throwRefine
 
 --------------------------------------------------------------------------------
