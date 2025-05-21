@@ -2,7 +2,7 @@ cabal-version: 3.0
 name:
   refined
 version:
-  0.8.2
+  0.8.3
 synopsis:
   Refinement types with static and runtime checking
 description:
@@ -37,6 +37,7 @@ tested-with:
   , GHC == 9.2.4
   , GHC == 9.4.2
   , GHC == 9.6.1
+  , GHC == 9.10.1
 extra-source-files:
     README.md
   , changelog.md
