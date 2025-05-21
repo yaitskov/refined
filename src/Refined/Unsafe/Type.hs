@@ -28,6 +28,7 @@
 --------------------------------------------------------------------------------
 
 {-# LANGUAGE CPP                        #-}
+{-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE DeriveFoldable             #-}
 {-# LANGUAGE DeriveTraversable          #-}
 {-# LANGUAGE DerivingStrategies         #-}
@@ -50,6 +51,7 @@ module Refined.Unsafe.Type
   , Refined1(Refined1)
   ) where
 
+import           Data.Data                    (Data, Typeable)
 import           Control.DeepSeq              (NFData)
 import           Data.Hashable (Hashable)
 import qualified Language.Haskell.TH.Syntax   as TH
@@ -70,6 +72,8 @@ newtype Refined (p :: k) x
     )
   deriving stock
     ( Foldable -- ^ @since 0.2
+    , Typeable
+    , Data
     )
 
 -- | @since 0.3.0.0
