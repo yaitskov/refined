@@ -180,7 +180,9 @@ module Refined
 import           Control.Exception            (Exception (displayException))
 import           Data.Coerce                  (coerce)
 import           Data.Either                  (isRight, rights)
+#if !MIN_VERSION_base(4,20,0)
 import           Data.Foldable                (foldl')
+#endif
 import           Data.Functor.Contravariant   ((>$<))
 import           Data.Proxy                   (Proxy(Proxy))
 import           Data.Text                    (Text)
