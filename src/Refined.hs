@@ -639,7 +639,6 @@ data IdPred
   = IdPred -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -664,7 +663,6 @@ data Not p
   deriving
     ( Generic -- ^ @since 0.3.0.0
     , Generic1 -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -692,7 +690,6 @@ data And l r
   deriving
     ( Generic -- ^ @since 0.3.0.0
     , Generic1 -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -733,7 +730,6 @@ data Or l r
   deriving
     ( Generic -- ^ @since 0.3.0.0
     , Generic1 -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -772,7 +768,6 @@ data Xor l r
   deriving
     ( Generic -- ^ @since 0.5
     , Generic1 -- ^ @since 0.5
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -813,7 +808,6 @@ data SizeLessThan (n :: Nat)
   = SizeLessThan -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -857,7 +851,6 @@ data SizeGreaterThan (n :: Nat)
   = SizeGreaterThan -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -902,7 +895,6 @@ data SizeEqualTo (n :: Nat)
   = SizeEqualTo -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -941,7 +933,6 @@ data Ascending
   = Ascending -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -970,7 +961,6 @@ data Descending
   = Descending -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -999,7 +989,6 @@ data LessThan (n :: Nat)
   = LessThan -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1030,7 +1019,6 @@ data GreaterThan (n :: Nat)
   = GreaterThan -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1064,7 +1052,6 @@ data From (n :: Nat)
   = From -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1095,7 +1082,6 @@ data To (n :: Nat)
   = To -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1131,7 +1117,6 @@ data FromTo (mn :: Nat) (mx :: Nat)
   = FromTo -- ^ @since 0.4.2
   deriving
     ( Generic-- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1168,7 +1153,6 @@ data EqualTo (n :: Nat)
   = EqualTo -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1199,7 +1183,6 @@ data NotEqualTo (n :: Nat)
   = NotEqualTo -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1231,7 +1214,6 @@ data NegativeFromTo (n :: Nat) (m :: Nat)
   = NegativeFromTo -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1266,7 +1248,6 @@ data DivisibleBy (n :: Nat)
   = DivisibleBy -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1296,7 +1277,6 @@ data Odd
   = Odd -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1324,7 +1304,6 @@ data NaN
   = NaN -- ^ @since 0.5
   deriving
     ( Generic -- ^ @since 0.5
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1355,7 +1334,6 @@ data Infinite
   = Infinite -- ^ @since 0.5
   deriving
     ( Generic -- ^ @since 0.5
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
@@ -1383,7 +1361,6 @@ data Even
   = Even -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.4.2
-    , Typeable -- ^ @since 0.8.3
     , Data -- ^ @since 0.8.3
     )
 
