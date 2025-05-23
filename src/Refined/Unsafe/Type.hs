@@ -72,8 +72,8 @@ newtype Refined (p :: k) x
     )
   deriving stock
     ( Foldable -- ^ @since 0.2
-    , Typeable
-    , Data
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.3.0.0

@@ -37,6 +37,7 @@
 {-# LANGUAGE BangPatterns               #-}
 {-# LANGUAGE CPP                        #-}
 {-# LANGUAGE DataKinds                  #-}
+{-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE FlexibleInstances          #-}
@@ -179,6 +180,7 @@ module Refined
 
 import           Control.Exception            (Exception (displayException))
 import           Data.Coerce                  (coerce)
+import           Data.Data                    (Data)
 import           Data.Either                  (isRight, rights)
 #if !MIN_VERSION_base(4,20,0)
 import           Data.Foldable                (foldl')
@@ -637,6 +639,8 @@ data IdPred
   = IdPred -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.3.0.0
@@ -660,7 +664,10 @@ data Not p
   deriving
     ( Generic -- ^ @since 0.3.0.0
     , Generic1 -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
+
 
 -- | @since 0.1.0.0
 instance Predicate p x => Predicate (Not p) x where
@@ -685,6 +692,8 @@ data And l r
   deriving
     ( Generic -- ^ @since 0.3.0.0
     , Generic1 -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 infixr 3 &&
@@ -724,6 +733,8 @@ data Or l r
   deriving
     ( Generic -- ^ @since 0.3.0.0
     , Generic1 -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 infixr 2 ||
@@ -761,6 +772,8 @@ data Xor l r
   deriving
     ( Generic -- ^ @since 0.5
     , Generic1 -- ^ @since 0.5
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- not provided because it clashes with GHC.TypeLits.^
@@ -800,6 +813,8 @@ data SizeLessThan (n :: Nat)
   = SizeLessThan -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 instance (Foldable t, KnownNat n) => Predicate1 (SizeLessThan n) t where
@@ -842,6 +857,8 @@ data SizeGreaterThan (n :: Nat)
   = SizeGreaterThan -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 instance (Foldable t, KnownNat n) => Predicate1 (SizeGreaterThan n) t where
@@ -885,6 +902,8 @@ data SizeEqualTo (n :: Nat)
   = SizeEqualTo -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 instance (Foldable t, KnownNat n) => Predicate1 (SizeEqualTo n) t where
@@ -922,6 +941,8 @@ data Ascending
   = Ascending -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.2.0.0
@@ -949,6 +970,8 @@ data Descending
   = Descending -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.2.0.0
@@ -976,6 +999,8 @@ data LessThan (n :: Nat)
   = LessThan -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.1.0.0
@@ -1005,6 +1030,8 @@ data GreaterThan (n :: Nat)
   = GreaterThan -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.1.0.0
@@ -1037,6 +1064,8 @@ data From (n :: Nat)
   = From -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.1.2
@@ -1066,6 +1095,8 @@ data To (n :: Nat)
   = To -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.1.2
@@ -1100,6 +1131,8 @@ data FromTo (mn :: Nat) (mx :: Nat)
   = FromTo -- ^ @since 0.4.2
   deriving
     ( Generic-- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.1.2
@@ -1135,6 +1168,8 @@ data EqualTo (n :: Nat)
   = EqualTo -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.1.0.0
@@ -1164,6 +1199,8 @@ data NotEqualTo (n :: Nat)
   = NotEqualTo -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.2.0.0
@@ -1194,6 +1231,8 @@ data NegativeFromTo (n :: Nat) (m :: Nat)
   = NegativeFromTo -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.4
@@ -1227,6 +1266,8 @@ data DivisibleBy (n :: Nat)
   = DivisibleBy -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.4.2
@@ -1255,6 +1296,8 @@ data Odd
   = Odd -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.3.0.0
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.4.2
@@ -1281,6 +1324,8 @@ data NaN
   = NaN -- ^ @since 0.5
   deriving
     ( Generic -- ^ @since 0.5
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.5
@@ -1310,6 +1355,8 @@ data Infinite
   = Infinite -- ^ @since 0.5
   deriving
     ( Generic -- ^ @since 0.5
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.5
@@ -1336,6 +1383,8 @@ data Even
   = Even -- ^ @since 0.4.2
   deriving
     ( Generic -- ^ @since 0.4.2
+    , Typeable -- ^ @since 0.8.3
+    , Data -- ^ @since 0.8.3
     )
 
 -- | @since 0.4.2
